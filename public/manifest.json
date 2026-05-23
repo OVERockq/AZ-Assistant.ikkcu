@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "AZ-Assistant.ikkcu",
+  "description": "Use local assistant instructions in a Chrome side panel to analyze pages and improve selected text.",
+  "version": "0.1.0",
+  "minimum_chrome_version": "114",
+  "permissions": ["activeTab", "sidePanel", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open AZ-Assistant.ikkcu"
+  },
+  "options_page": "src/options/index.html",
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["assets/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

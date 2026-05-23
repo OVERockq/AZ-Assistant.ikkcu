@@ -1,0 +1,292 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #18201d;
+  background: #f7f8f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid #cfd6ce;
+  background: #ffffff;
+  border-radius: 8px;
+  min-height: 36px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.settings {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+p {
+  margin: 6px 0 0;
+  color: #59655e;
+}
+
+.primary {
+  background: #123a66;
+  border-color: #123a66;
+  color: #ffffff;
+}
+
+.notice,
+.api-card,
+.assistant-list,
+.editor {
+  border: 1px solid #dbe1da;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.notice {
+  padding: 12px;
+  margin-bottom: 12px;
+  color: #17324d;
+  background: #eef3f8;
+}
+
+.api-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 14px;
+}
+
+.assistant-list {
+  padding: 10px;
+  align-self: start;
+}
+
+.list-header,
+.danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.assistant-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.assistant-row.active {
+  background: #eef3f8;
+}
+
+.assistant-row span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.assistant-row div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.assistant-row small {
+  overflow: hidden;
+  color: #59655e;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #cfd6ce;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 400;
+}
+
+input[type="color"] {
+  min-height: 42px;
+  padding: 4px;
+}
+
+textarea {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+textarea.large {
+  min-height: 180px;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.provider-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #dbe1da;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fbfcfa;
+}
+
+.provider-card.active {
+  border-color: #123a66;
+  background: #eef3f8;
+}
+
+.provider-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.provider-card-title span {
+  color: #123a66;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.model-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.field-error {
+  color: #8b2f22;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.danger-row {
+  border-top: 1px solid #e6ebe5;
+  padding-top: 14px;
+}
+
+.danger-row span {
+  color: #59655e;
+}
+
+.feature-editor {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid #e6ebe5;
+  padding-top: 14px;
+}
+
+.feature-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #dbe1da;
+  border-radius: 8px;
+  background: #fbfcfa;
+  padding: 12px;
+}
+
+.feature-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+@media (max-width: 800px) {
+  .settings {
+    padding: 18px;
+  }
+
+  header,
+  .layout,
+  .field-row,
+  .provider-grid {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    display: grid;
+  }
+}
