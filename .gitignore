@@ -20,3 +20,9 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Agent coding artifacts (design docs, blog posts, etc.)
+docs/*.md
+CLAUDE.md
+*.design.md
+*.spec.md
