@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AZ-Assistant.ikkcu — 브라우저 사이드패널 AI 어시스턴트</title>
+  <meta name="description" content="Chrome 사이드패널에서 바로 쓰는 개인형 AI Assistant. Ollama, ChatGPT, Claude, Gemini 지원." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --bg2: #13161d;
+      --bg3: #1a1d27;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #7b8299;
+      --accent: #6c7fff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --grad: linear-gradient(135deg, #6c7fff 0%, #a78bfa 100%);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 60px;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1rem; font-weight: 700; letter-spacing: -0.02em;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a {
+      color: var(--muted); font-size: 0.875rem; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 1rem; border-radius: 6px;
+      background: var(--grad); color: #fff !important;
+      font-size: 0.82rem; font-weight: 600; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; color: #fff !important; }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 2rem; max-width: 1080px; margin: 0 auto; }
+
+    /* ── HERO ── */
+    #hero {
+      padding-top: 120px; padding-bottom: 5rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.9rem; border-radius: 999px;
+      border: 1px solid rgba(108,127,255,0.4);
+      background: rgba(108,127,255,0.08);
+      font-size: 0.78rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 1.8rem; letter-spacing: 0.04em;
+    }
+    .badge::before { content: '●'; font-size: 0.5rem; color: var(--accent3); }
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    h1 span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc {
+      max-width: 600px; font-size: 1.1rem; color: var(--muted); margin-bottom: 2.5rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.6rem; border-radius: 8px;
+      background: var(--grad); color: #fff;
+      font-size: 0.95rem; font-weight: 600; text-decoration: none;
+      box-shadow: 0 4px 20px rgba(108,127,255,0.35);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.6rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg3);
+      color: var(--text); font-size: 0.95rem; font-weight: 600; text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+    /* ── MOCKUP ── */
+    .mockup-wrap {
+      margin-top: 4rem; width: 100%; max-width: 780px;
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,127,255,0.15);
+    }
+    .mockup-bar {
+      background: var(--bg3); padding: 0.7rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+    .mockup-body {
+      background: var(--bg2); padding: 1.5rem 1.8rem;
+      display: grid; grid-template-columns: 1fr 280px; gap: 1.2rem; min-height: 320px;
+    }
+    .mockup-page { background: var(--bg3); border-radius: 8px; padding: 1.2rem; }
+    .mockup-page-line {
+      height: 10px; border-radius: 4px; background: rgba(255,255,255,0.06); margin-bottom: 0.7rem;
+    }
+    .mockup-page-line:nth-child(2) { width: 85%; }
+    .mockup-page-line:nth-child(3) { width: 92%; }
+    .mockup-page-line:nth-child(4) { width: 70%; }
+    .mockup-page-line.sel { background: rgba(108,127,255,0.25); width: 88%; }
+    .mockup-panel {
+      background: var(--bg3); border-radius: 8px; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.7rem;
+    }
+    .mockup-panel-title {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted);
+    }
+    .mockup-assistant {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.7rem; border-radius: 6px;
+      background: rgba(108,127,255,0.12); border: 1px solid rgba(108,127,255,0.3);
+    }
+    .assistant-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .assistant-label { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .mockup-features { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .feat-chip {
+      padding: 0.25rem 0.6rem; border-radius: 4px;
+      background: var(--bg); border: 1px solid var(--border);
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .feat-chip.active { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); color: var(--accent3); }
+    .mockup-response {
+      flex: 1; background: var(--bg); border-radius: 6px; padding: 0.8rem;
+      font-size: 0.75rem; color: var(--muted); line-height: 1.6;
+    }
+    .mockup-response span { color: var(--text); }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;
+      margin-bottom: 5rem;
+    }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; text-align: center;
+    }
+    .stat-num {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── SECTION TITLES ── */
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--muted); max-width: 560px; font-size: 1rem; }
+
+    /* ── FEATURES ── */
+    #features { padding-top: 5rem; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem;
+      margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.8rem; transition: border-color 0.2s, transform 0.2s;
+    }
+    .feature-card:hover { border-color: rgba(108,127,255,0.35); transform: translateY(-3px); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .feature-icon.purple { background: rgba(108,127,255,0.12); }
+    .feature-icon.violet { background: rgba(167,139,250,0.12); }
+    .feature-icon.green  { background: rgba(52,211,153,0.12); }
+    .feature-icon.pink   { background: rgba(251,113,133,0.12); }
+    .feature-icon.blue   { background: rgba(56,189,248,0.12); }
+    .feature-icon.amber  { background: rgba(251,191,36,0.12); }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── HOW IT WORKS ── */
+    #how { padding-top: 5rem; }
+    .steps { display: flex; flex-direction: column; gap: 0; margin-top: 3rem; position: relative; }
+    .steps::before {
+      content: ''; position: absolute; left: 22px; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+    .step { display: flex; gap: 1.5rem; padding-bottom: 2.5rem; position: relative; }
+    .step-num {
+      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800;
+      background: var(--bg3); border: 2px solid rgba(108,127,255,0.4);
+      color: var(--accent); z-index: 1;
+    }
+    .step-content { padding-top: 0.5rem; }
+    .step-content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .step-content p { font-size: 0.875rem; color: var(--muted); }
+
+    /* ── PROVIDERS ── */
+    #providers { padding-top: 5rem; }
+    .provider-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;
+      margin-top: 3rem;
+    }
+    .provider-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; display: flex; align-items: center; gap: 1rem;
+      transition: border-color 0.2s;
+    }
+    .provider-card:hover { border-color: rgba(255,255,255,0.16); }
+    .provider-logo {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 800; flex-shrink: 0;
+    }
+    .p-ollama { background: #1c1c1c; color: #fff; font-size: 0.9rem; }
+    .p-openai { background: #10a37f; color: #fff; font-size: 0.85rem; }
+    .p-claude { background: #d4a574; color: #fff; font-size: 0.85rem; }
+    .p-gemini { background: linear-gradient(135deg,#4285f4,#34a853); color: #fff; font-size: 0.85rem; }
+    .provider-info h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .provider-info p { font-size: 0.8rem; color: var(--muted); }
+    .provider-default {
+      margin-left: auto; padding: 0.2rem 0.55rem; border-radius: 4px;
+      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+      font-size: 0.7rem; font-weight: 600; color: var(--accent3); white-space: nowrap;
+    }
+
+    /* ── SETUP ── */
+    #setup { padding-top: 5rem; }
+    .setup-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem;
+    }
+    @media (max-width: 680px) { .setup-grid { grid-template-columns: 1fr; } }
+    .code-block {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.4rem 1.6rem; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem;
+    }
+    .code-block .comment { color: var(--muted); }
+    .code-block .cmd { color: var(--accent3); }
+    .code-block .flag { color: var(--accent2); }
+    .setup-note {
+      grid-column: 1 / -1;
+      background: rgba(108,127,255,0.06); border: 1px solid rgba(108,127,255,0.2);
+      border-radius: 10px; padding: 1.2rem 1.5rem;
+      font-size: 0.875rem; color: var(--muted);
+    }
+    .setup-note strong { color: var(--text); }
+
+    /* ── CTA ── */
+    #cta {
+      text-align: center; padding: 6rem 2rem;
+      background: radial-gradient(ellipse 700px 400px at center, rgba(108,127,255,0.08) 0%, transparent 70%);
+    }
+    #cta h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    #cta p { color: var(--muted); max-width: 480px; margin: 0 auto 2.5rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 2.5rem 2rem;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: gap;
+      max-width: 1080px; margin: 0 auto;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    footer .footer-links { display: flex; gap: 1.5rem; }
+
+    @media (max-width: 720px) {
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-panel { display: none; }
+      nav .nav-links { display: none; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">AZ-Assistant.ikkcu</span>
+    <div class="nav-links">
+      <a href="#features">기능</a>
+      <a href="#how">사용법</a>
+      <a href="#providers">지원 모델</a>
+      <a href="#setup">설치</a>
+    </div>
+    <a class="nav-cta" href="https://github.com/OVERockq/AZ-Assistant.ikkcu" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.83-.26.83-.57v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.75-1.33-1.75-1.08-.74.08-.72.08-.72 1.2.08 1.83 1.23 1.83 1.23 1.06 1.82 2.79 1.3 3.47.99.1-.77.41-1.3.75-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.28-1.23 3.28-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.9 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.68.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="badge">Chrome Extension · MV3</div>
+    <h1>브라우저 사이드패널에서<br><span>내 기준으로 움직이는</span><br>AI 어시스턴트</h1>
+    <p class="hero-desc">
+      페이지를 읽다가 사이드패널을 열고, 미리 설정한 Assistant를 선택해 바로 요청하세요.
+      Ollama, ChatGPT, Claude, Gemini 모두 지원합니다.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="https://github.com/OVERockq/AZ-Assistant.ikkcu" target="_blank">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.83-.26.83-.57v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.75-1.33-1.75-1.08-.74.08-.72.08-.72 1.2.08 1.83 1.23 1.83 1.23 1.06 1.82 2.79 1.3 3.47.99.1-.77.41-1.3.75-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.28-1.23 3.28-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.9 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.68.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub에서 보기
+      </a>
+      <a class="btn-secondary" href="#setup">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        설치 방법
+      </a>
+    </div>
+
+    <!-- MOCKUP -->
+    <div class="mockup-wrap">
+      <div class="mockup-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-page">
+          <div class="mockup-page-line"></div>
+          <div class="mockup-page-line"></div>
+          <div class="mockup-page-line"></div>
+          <div class="mockup-page-line"></div>
+          <div class="mockup-page-line" style="height:12px; width:95%; margin-top:1rem;"></div>
+          <div class="mockup-page-line sel" style="margin-top:0.7rem;"></div>
+          <div class="mockup-page-line sel" style="width:60%;"></div>
+          <div class="mockup-page-line" style="width:80%; margin-top:0.7rem;"></div>
+          <div class="mockup-page-line" style="width:88%;"></div>
+        </div>
+        <div class="mockup-panel">
+          <div class="mockup-panel-title">Assistant</div>
+          <div class="mockup-assistant">
+            <div class="assistant-dot"></div>
+            <span class="assistant-label">문서 리뷰 Assistant</span>
+          </div>
+          <div class="mockup-panel-title" style="margin-top:0.5rem;">기능</div>
+          <div class="mockup-features">
+            <span class="feat-chip active">요약</span>
+            <span class="feat-chip">리뷰</span>
+            <span class="feat-chip">번역</span>
+            <span class="feat-chip">재작성</span>
+          </div>
+          <div class="mockup-response">
+            <span>선택한 문단 분석 결과:</span><br/><br/>
+            리스크 항목 2건 확인됨.
+            납기 조건 불명확,
+            책임 범위 미정의...
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div style="max-width:1080px; margin:0 auto; padding: 0 2rem;">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">4+</div><div class="stat-label">지원 LLM Provider</div></div>
+      <div class="stat-card"><div class="stat-num">∞</div><div class="stat-label">Assistant 무제한 생성</div></div>
+      <div class="stat-card"><div class="stat-num">MV3</div><div class="stat-label">Chrome Manifest V3</div></div>
+      <div class="stat-card"><div class="stat-num">0</div><div class="stat-label">서버 불필요 (로컬 우선)</div></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">반복을 줄이고<br>흐름을 유지하세요</h2>
+    <p class="section-desc">
+      매번 맥락을 복사·붙여넣기하고 프롬프트를 다시 쓰는 번거로움 없이,
+      미리 설정한 Assistant가 그 역할을 대신합니다.
+    </p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon purple">🤖</div>
+        <h3>다중 Assistant</h3>
+        <p>문서 요약, 계약 검토, 블로그 작성, 개발 리뷰 등 목적별 Assistant를 별도로 만들어 관리할 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">📄</div>
+        <h3>페이지 컨텍스트 자동 수집</h3>
+        <p>현재 페이지의 제목, URL, 선택한 텍스트, 주변 문단을 자동으로 수집해 AI에 전달합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon violet">📚</div>
+        <h3>참고 문서 연동</h3>
+        <p>Assistant마다 참고 문서를 등록해 로컬 컨텍스트로 활용할 수 있습니다. 벡터 검색 없이 키워드 기반으로 동작합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon pink">✏️</div>
+        <h3>선택 영역 직접 교체</h3>
+        <p>생성된 응답을 클립보드에 복사하거나, 선택한 텍스트를 AI 결과로 바로 교체할 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue">⚡</div>
+        <h3>커스텀 기능 버튼</h3>
+        <p>자주 쓰는 작업(요약, 리뷰, 번역, 재작성 등)을 버튼으로 등록해두고 한 번에 실행합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon amber">🔒</div>
+        <h3>완전 로컬 저장</h3>
+        <p>모든 설정과 API 키는 Chrome 로컬 스토리지에만 저장됩니다. 외부 서버로 전송되지 않습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">7단계로<br>완료되는 워크플로우</h2>
+    <p class="section-desc">탭 전환 없이 사이드패널 안에서 모든 과정이 이루어집니다.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content"><h3>페이지 열기</h3><p>분석하거나 작업할 웹 페이지를 Chrome에서 엽니다.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content"><h3>확장 프로그램 아이콘 클릭</h3><p>툴바의 AZ-Assistant.ikkcu 아이콘을 클릭해 사이드패널을 엽니다.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content"><h3>Assistant 선택</h3><p>상황에 맞는 Assistant를 선택합니다. (예: 계약 검토 / 문서 요약 / 개발 리뷰)</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content"><h3>기능 선택</h3><p>Assistant에 등록된 기능 버튼 중 하나를 선택합니다.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content"><h3>텍스트 선택 (선택 사항)</h3><p>기능이 선택 영역을 필요로 하면 페이지에서 원하는 텍스트를 드래그합니다.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content"><h3>프롬프트 전송</h3><p>자동 생성된 프롬프트를 확인하고 필요 시 수정한 뒤 전송합니다.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-content"><h3>결과 활용</h3><p>Markdown으로 렌더링된 응답을 복사하거나, 선택한 텍스트를 결과로 바로 교체합니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROVIDERS -->
+  <section id="providers">
+    <div class="section-label">Providers</div>
+    <h2 class="section-title">4가지 LLM Provider<br>지원</h2>
+    <p class="section-desc">로컬 모델부터 클라우드 API까지, 원하는 환경에서 사용할 수 있습니다.</p>
+    <div class="provider-grid">
+      <div class="provider-card">
+        <div class="provider-logo p-ollama">AI</div>
+        <div class="provider-info">
+          <h3>Ollama</h3>
+          <p>로컬 실행, API 키 불필요</p>
+        </div>
+        <span class="provider-default">기본값</span>
+      </div>
+      <div class="provider-card">
+        <div class="provider-logo p-openai">GP</div>
+        <div class="provider-info">
+          <h3>ChatGPT / OpenAI</h3>
+          <p>OpenAI 호환 엔드포인트</p>
+        </div>
+      </div>
+      <div class="provider-card">
+        <div class="provider-logo p-claude">C</div>
+        <div class="provider-info">
+          <h3>Claude</h3>
+          <p>Anthropic Messages API</p>
+        </div>
+      </div>
+      <div class="provider-card">
+        <div class="provider-logo p-gemini">G</div>
+        <div class="provider-info">
+          <h3>Gemini</h3>
+          <p>Google Gemini API</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section id="setup">
+    <div class="section-label">Setup</div>
+    <h2 class="section-title">빠른 설치</h2>
+    <p class="section-desc">빌드 후 Chrome에 로드하면 바로 사용할 수 있습니다.</p>
+    <div class="setup-grid">
+      <div>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.7rem;">① 저장소 클론 및 빌드</p>
+        <div class="code-block">
+          <div><span class="comment"># 저장소 클론</span></div>
+          <div><span class="cmd">git</span> clone git@github.com:OVERockq/AZ-Assistant.ikkcu.git</div>
+          <div style="margin-top:0.5rem;"><span class="cmd">npm</span> install</div>
+          <div><span class="cmd">npm</span> run build</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.7rem;">② Chrome에 로드</p>
+        <div class="code-block">
+          <div><span class="comment"># chrome://extensions 열기</span></div>
+          <div style="margin-top:0.5rem;">1. 개발자 모드 활성화</div>
+          <div>2. "압축해제된 확장 프로그램 로드"</div>
+          <div>3. <span class="flag">dist/</span> 폴더 선택</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.7rem;">③ Ollama 사용 시 CORS 설정</p>
+        <div class="code-block">
+          <div><span class="comment"># macOS (Ollama 앱)</span></div>
+          <div style="word-break:break-all;"><span class="cmd">launchctl</span> setenv OLLAMA_ORIGINS <span class="flag">'chrome-extension://*,http://localhost:*'</span></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.7rem;">④ ZIP 패키징 (선택)</p>
+        <div class="code-block">
+          <div><span class="comment"># dist 폴더를 ZIP으로 압축</span></div>
+          <div style="margin-top:0.5rem;"><span class="cmd">cd</span> dist</div>
+          <div><span class="cmd">zip</span> <span class="flag">-r</span> ../az-assistant-ikkcu.zip .</div>
+        </div>
+      </div>
+      <div class="setup-note">
+        <strong>주의:</strong> API 키는 Chrome 로컬 스토리지에만 저장됩니다.
+        공유 빌드에 API 키를 포함시키지 마세요.
+        Google Docs, Notion 등 복잡한 에디터에서는 텍스트 교체가 지원되지 않을 수 있으며, 이 경우 응답이 클립보드에 복사됩니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta" style="max-width:100%; padding-top:5rem; padding-bottom:5rem;">
+    <h2>지금 바로 시작하세요</h2>
+    <p>오픈소스 프로젝트입니다. 기여, 이슈 제보, 피드백 모두 환영합니다.</p>
+    <div class="hero-actions" style="justify-content:center;">
+      <a class="btn-primary" href="https://github.com/OVERockq/AZ-Assistant.ikkcu" target="_blank">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.83-.26.83-.57v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.75-1.33-1.75-1.08-.74.08-.72.08-.72 1.2.08 1.83 1.23 1.83 1.23 1.06 1.82 2.79 1.3 3.47.99.1-.77.41-1.3.75-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.28-1.23 3.28-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.9 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.68.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub 저장소 열기
+      </a>
+      <a class="btn-secondary" href="#setup">설치 가이드 보기</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© 2025 AZ-Assistant.ikkcu</span>
+    <div class="footer-links">
+      <a href="https://github.com/OVERockq/AZ-Assistant.ikkcu" target="_blank">GitHub</a>
+      <a href="https://github.com/OVERockq/AZ-Assistant.ikkcu/issues" target="_blank">Issues</a>
+      <a href="https://github.com/OVERockq/AZ-Assistant.ikkcu/blob/main/README.md" target="_blank">README</a>
+    </div>
+  </footer>
+
+</body>
+</html>
