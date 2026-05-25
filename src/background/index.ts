@@ -57,7 +57,8 @@ const rememberActivePanelTab = async (tabId: number): Promise<void> => {
 chrome.action.onClicked.addListener((tab) => {
   if (!tab.id) return;
 
-  openPanelForTab(tab.id)
+  preparePanelForTab(tab.id)
+    .then(() => openPanelForTab(tab.id!))
     .then(() => rememberActivePanelTab(tab.id!))
     .catch((error) => console.error("Failed to open side panel", error));
 });
