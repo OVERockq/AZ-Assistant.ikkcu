@@ -79,7 +79,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
     await disablePanelForTab(previousFocusedTabId);
   }
 
-  await preparePanelForTab(tabId);
+  await preparePanelForTab(tabId).catch(() => undefined);
   await setLastFocusedTabId(tabId);
 });
 
