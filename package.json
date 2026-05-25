@@ -4,34 +4,34 @@
   "private": true,
   "main": "tray-app/dist/main.js",
   "scripts": {
-    "dev":                   "vite --host 127.0.0.1",
-    "build":                 "tsc --noEmit && vite build",
-    "preview":               "vite preview --host 127.0.0.1",
-    "build:installer":       "bash scripts/build-installer.sh all",
-    "build:installer:win":   "bash scripts/build-installer.sh win",
-    "build:installer:mac-x64":   "bash scripts/build-installer.sh mac-x64",
-    "build:installer:mac-arm64": "bash scripts/build-installer.sh mac-arm64",
-    "build:installer:linux": "bash scripts/build-installer.sh linux",
-    "build:tray":            "bash scripts/build-tray.sh current",
-    "build:tray:mac":        "bash scripts/build-tray.sh mac",
-    "build:tray:win":        "bash scripts/build-tray.sh win",
-    "build:tray:linux":      "bash scripts/build-tray.sh linux",
-    "build:all":             "bash scripts/build-installer.sh all && bash scripts/build-tray.sh current"
-  },
-  "pkg": {
-    "assets":  ["installer/extension/**/*"],
-    "scripts": ["installer/dist/**/*.js"]
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "build:tray": "bash scripts/build-tray.sh current",
+    "build:tray:mac": "bash scripts/build-tray.sh mac",
+    "build:tray:win": "bash scripts/build-tray.sh win",
+    "build:tray:linux": "bash scripts/build-tray.sh linux",
+    "build:all": "bash scripts/build-tray.sh current"
   },
   "build": {
-    "appId":        "com.ikkcu.az-assistant",
-    "productName":  "AZ-Assistant",
-    "copyright":    "Copyright © 2024 ikkcu",
+    "appId": "com.ikkcu.az-assistant",
+    "productName": "AZ-Assistant",
+    "copyright": "Copyright © 2024 ikkcu",
     "artifactName": "AZ-Assistant-${version}-${arch}.${ext}",
     "directories": {
       "output": "releases/tray"
     },
     "files": [
       "tray-app/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "dist/",
+        "to": "extension",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "extraMetadata": {
       "main": "tray-app/dist/main.js",
@@ -41,30 +41,53 @@
       "category": "public.app-category.productivity",
       "identity": null,
       "target": [
-        { "target": "zip", "arch": ["arm64"] },
-        { "target": "zip", "arch": ["x64"] }
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "win": {
-      "target": [{ "target": "portable", "arch": ["x64"] }]
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "linux": {
       "category": "Utility",
-      "target": [{ "target": "AppImage", "arch": ["x64"] }]
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     }
   },
   "devDependencies": {
-    "@types/chrome":       "^0.1.38",
-    "@types/node":         "^20.0.0",
-    "@types/react":        "^19.2.7",
-    "@types/react-dom":    "^19.2.3",
+    "@types/chrome": "^0.1.38",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "@yao-pkg/pkg":        "^5.16.1",
-    "electron":            "^33.4.0",
-    "electron-builder":    "^25.1.8",
-    "react":               "^19.2.3",
-    "react-dom":           "^19.2.3",
-    "typescript":          "^5.9.3",
-    "vite":                "^7.2.7"
+    "electron": "^33.4.0",
+    "electron-builder": "^25.1.8",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
   }
 }

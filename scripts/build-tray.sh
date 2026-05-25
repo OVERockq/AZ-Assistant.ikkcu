@@ -42,6 +42,12 @@ if [ ! -d node_modules ]; then
 fi
 ok "node_modules 확인"
 
+# ── Chrome Extension 빌드 ────────────────────────────────────────────────────
+step "Chrome Extension 빌드 (Vite)"
+npm run build
+[ -f dist/manifest.json ] || fail "Extension 빌드 실패: dist/manifest.json 없음"
+ok "Extension 빌드 완료 → dist/"
+
 # ── Tray TypeScript 컴파일 ────────────────────────────────────────────────────
 step "Tray TypeScript 컴파일 (tsconfig.tray.json)"
 npx tsc --project tsconfig.tray.json
