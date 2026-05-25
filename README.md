@@ -23,7 +23,34 @@ The default provider is Ollama, with optional support for ChatGPT/OpenAI, Claude
 
 Provider settings are stored in `chrome.storage.local`. This project is intended for personal or internal use. Do not publish a shared build with embedded API keys.
 
-## Setup
+## Quick Install (실행파일)
+
+별도의 Node.js / npm 설치 없이 바로 실행 가능한 설치 프로그램입니다.
+
+| 플랫폼 | 파일명 |
+|--------|--------|
+| Windows x64 | `az-assistant-installer-win.exe` |
+| macOS Intel | `az-assistant-installer-mac-x64` |
+| macOS Apple Silicon | `az-assistant-installer-mac-arm64` |
+| Linux x64 | `az-assistant-installer-linux` |
+
+**macOS / Linux:**
+```bash
+chmod +x az-assistant-installer-mac-arm64
+./az-assistant-installer-mac-arm64
+```
+
+**Windows:**  
+`az-assistant-installer-win.exe`를 더블클릭하거나 CMD에서 실행
+
+실행하면:
+1. Extension 파일을 `~/.az-assistant/extension/` 에 자동 설치
+2. Chrome을 자동 탐지하고 선택적으로 실행
+3. 수동 설치 방법도 안내 (`chrome://extensions` → Load unpacked)
+
+---
+
+## 개발자 Setup
 
 ```bash
 npm install
@@ -31,6 +58,21 @@ npm run build
 ```
 
 Load the generated `dist` directory from `chrome://extensions` as an unpacked extension.
+
+## 설치 프로그램 빌드 (실행파일 만들기)
+
+```bash
+# 모든 플랫폼 (Windows, macOS x64/arm64, Linux)
+npm run build:installer
+
+# 특정 플랫폼만
+npm run build:installer:win        # Windows x64
+npm run build:installer:mac-x64    # macOS Intel
+npm run build:installer:mac-arm64  # macOS Apple Silicon
+npm run build:installer:linux      # Linux x64
+```
+
+빌드 결과물은 `releases/` 폴더에 생성됩니다.
 
 ## Ollama Setup
 
@@ -88,7 +130,7 @@ Selection replacement is supported for:
 
 Complex editors such as Google Docs, Notion, iframe editors, Shadow DOM editors, and canvas-based editors may fail and will fall back to copying the generated response.
 
-## Packaging
+## Packaging (ZIP)
 
 Build first:
 

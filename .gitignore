@@ -26,3 +26,15 @@ docs/*.md
 CLAUDE.md
 *.design.md
 *.spec.md
+
+# Installer build artifacts
+installer/dist/
+installer/node_modules/
+installer/extension/
+
+# Release executables (binary files)
+releases/
+
+# Tray app build artifacts
+tray-app/dist/
+tray-app/node_modules/
